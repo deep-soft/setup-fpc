@@ -693,7 +693,7 @@ class Lazarus {
 
                     // Run the installer
                     let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
-                    yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
+                    yield exec_1.exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                     // Add this path to the runner's global path
                     core.addPath(lazarusDir);
@@ -729,7 +729,7 @@ class Lazarus {
 
                     // Run the installer
                     let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
-                    yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
+                    yield exec_1.exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                 } catch(err) {
                     throw err;
