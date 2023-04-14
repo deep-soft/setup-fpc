@@ -850,11 +850,11 @@ class Lazarus {
             case "win32":
                 if (this._Arch == 'x64') {
                     result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Lazarus%20${this._LazarusVersion}/`;
-                    result += pkgs['win64'][lazVer];
+                    result += pkgs['win64'][lazVer][pkg];
                 }
                 else {
                     result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2032%20bits/Lazarus%20${this._LazarusVersion}/`;
-                    result += pkgs[this._Platform][lazVer];
+                    result += pkgs[this._Platform][lazVer][pkg];
                 }
                 break;
             case "linux":
