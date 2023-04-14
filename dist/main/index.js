@@ -242,6 +242,10 @@ const pkgs = {
         "v1_0_12": "lazarus-1.0.12-fpc-2.6.2-win32.exe"
     },
     "win64": {
+        "v2_2_6":{
+            "laz64": "lazarus-2.2.6-fpc-3.2.2-win64.exe",
+            "laz32": "lazarus-2.2.6-fpc-3.2.2-cross-i386-win32-win64.exe"
+        },
         "v2_2_2": "lazarus-2.2.2-fpc-3.2.2-win64.exe",
         "v2_2_0": "lazarus-2.2.0-fpc-3.2.2-win64.exe",
         "v2_0_12": "lazarus-2.0.12-fpc-3.2.0-win64.exe",
@@ -662,40 +666,68 @@ class Lazarus {
             let cacheRestored = yield this._Cache.restore();
             switch (this._Platform) {
                 case 'win32':
-                    // Get the URL of the file to download
-                    let downloadURL = this._getPackageURL('laz');
-                    core.info(`_downloadLazarus - Downloading ${downloadURL}`);
-                    let downloadPath_WIN;
-                    try {
-                        if (cacheRestored) {
-                            // Use cached version
-                            downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}.exe`);
-                            core.info(`_downloadLazarus - Using cache restored into ${downloadPath_WIN}`);
-                        }
-                        else {
-                            // Perform the download
-                            downloadPath_WIN = yield tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}.exe`));
-                            core.info(`_downloadLazarus - Downloaded into ${downloadPath_WIN}`);
-                        }
-                        // Run the installer
-                        let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
-                        yield exec_1.exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
-                        // Add this path to the runner's global path
-                        core.addPath(lazarusDir);
-                        core.info(`_downloadLazarus - Adding '${lazarusDir}' to PATH`);
-                        // Add the path to fpc.exe to the runner's global path
-                        // TODO: This is very sketchy and may break in the future. Needs better implementation!
-                        let lazVer = 'v' + this._LazarusVersion.replace(/\./gi, '_');
-                        let parts = pkgs['win64'][lazVer].split('-');
-                        let fpc_version = parts[3];
-                        let fpcDir = path.join(lazarusDir, 'fpc', fpc_version, 'bin', 'x86_64-win64');
-                        core.addPath(fpcDir);
-                        core.info(`_downloadLazarus - Adding '${fpcDir}' to PATH`);
+                let downloadURL: string;
+                let downloadPath_WIN: string;
+
+                // Get the URL of the file to download
+                downloadURL = this._getPackageURL('laz64');
+                core.info(`_downloadLazarus - Downloading ${downloadURL}`);
+                try {
+
+                    if (cacheRestored) {
+                        // Use cached version
+                        downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-64.exe`);
+                        core.info(`_downloadLazarus - Using cache restored into ${downloadPath_WIN}`);
+                    } else {
+                        // Perform the download
+                        downloadPath_WIN = yield tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-64.exe`));
+                        core.info(`_downloadLazarus - Downloaded into ${downloadPath_WIN}`);
                     }
-                    catch (err) {
-                        throw err;
+
+                    // Run the installer
+                    let lazarusDir: string = path.join(this._getTempDirectory(), 'lazarus');
+                    yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
+
+                    // Add this path to the runner's global path
+                    core.addPath(lazarusDir);
+                    core.info(`_downloadLazarus - Adding '${lazarusDir}' to PATH`);
+
+                    // Add the path to fpc.exe to the runner's global path
+                    // TODO: This is very sketchy and may break in the future. Needs better implementation!
+                    let lazVer = 'v' + this._LazarusVersion.replace(/\./gi, '_');
+                    let parts = pkgs['win64'][lazVer].split('-');
+                    let fpc_version = parts[3];
+                    let fpcDir = path.join(lazarusDir, 'fpc', fpc_version, 'bin', 'x86_64-win64');
+                    core.addPath(fpcDir);
+                    core.info(`_downloadLazarus - Adding '${fpcDir}' to PATH`);
+
+                } catch(err) {
+                    throw err;
+                }
+
+                // Get the URL of the file to download
+                downloadURL = this._getPackageURL('laz32');
+                core.info(`_downloadLazarus - Downloading ${downloadURL}`);
+                try {
+
+                    if (cacheRestored) {
+                        // Use cached version
+                        downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-32.exe`);
+                        core.info(`_downloadLazarus - Using cache restored into ${downloadPath_WIN}`);
+                    } else {
+                        // Perform the download
+                        downloadPath_WIN = yield tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-32.exe`));
+                        core.info(`_downloadLazarus - Downloaded into ${downloadPath_WIN}`);
                     }
-                    break;
+
+                    // Run the installer
+                    let lazarusDir: string = path.join(this._getTempDirectory(), 'lazarus');
+                    yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
+
+                } catch(err) {
+                    throw err;
+                }
+                break;
                 case 'linux':
                     // Perform a repository update
                     yield exec_1.exec('sudo apt update');
