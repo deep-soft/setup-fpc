@@ -675,6 +675,9 @@ class Lazarus {
                 case 'win32':
                 let downloadURL;
                 let downloadPath_WIN;
+                let tempDirectory = process.env['RUNNER_TEMP'] || '';
+                assert_1.ok(tempDirectory, 'Expected RUNNER_TEMP to be defined');
+                let lazarusDir = path.join(tempDirectory, 'lazarus');
 
                 // Get the URL of the file to download
                 downloadURL = this._getPackageURL('laz64');
@@ -692,7 +695,6 @@ class Lazarus {
                     }
 
                     // Run the installer
-                    let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
                     yield exec_1.exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                     // Add this path to the runner's global path
@@ -728,7 +730,6 @@ class Lazarus {
                     }
 
                     // Run the installer
-                    let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
                     yield exec_1.exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                 } catch(err) {
