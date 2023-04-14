@@ -702,7 +702,7 @@ class Lazarus {
                     // Add the path to fpc.exe to the runner's global path
                     // TODO: This is very sketchy and may break in the future. Needs better implementation!
                     let lazVer = 'v' + this._LazarusVersion.replace(/\./gi, '_');
-                    let parts = pkgs['win64'][lazVer].split('-');
+                    let parts = pkgs['win64'][lazVer]['laz64'].split('-');
                     let fpc_version = parts[3];
                     let fpcDir = path.join(lazarusDir, 'fpc', fpc_version, 'bin', 'x86_64-win64');
                     core.addPath(fpcDir);
