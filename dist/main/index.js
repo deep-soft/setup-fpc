@@ -216,6 +216,10 @@ const Cache_1 = __webpack_require__(3123);
 const StableVersion = '2.2.2';
 const pkgs = {
     "win32": {
+        "v2_2_6":{
+            "laz64": "lazarus-2.2.6-fpc-3.2.2-win64.exe",
+            "laz32": "lazarus-2.2.6-fpc-3.2.2-cross-i386-win32-win64.exe"
+        },
         "v2_2_2": "lazarus-2.2.2-fpc-3.2.2-win32.exe",
         "v2_2_0": "lazarus-2.2.0-fpc-3.2.2-win32.exe",
         "v2_0_12": "lazarus-2.0.12-fpc-3.2.0-win32.exe",
