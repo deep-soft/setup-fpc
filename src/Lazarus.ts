@@ -40,6 +40,10 @@ const pkgs: object = {
         "v1_0_12" : "lazarus-1.0.12-fpc-2.6.2-win32.exe"
     },
     "win64": {
+        "v2_2_6":{
+            "laz64": "lazarus-2.2.6-fpc-3.2.2-win64.exe",
+            "laz32": "lazarus-2.2.6-fpc-3.2.2-cross-i386-win32-win64.exe"
+        },        
         "v2_2_2"  : "lazarus-2.2.2-fpc-3.2.2-win64.exe",
         "v2_2_0"  : "lazarus-2.2.0-fpc-3.2.2-win64.exe",
         "v2_0_12" : "lazarus-2.0.12-fpc-3.2.0-win64.exe",
@@ -442,21 +446,21 @@ export class Lazarus{
 
         switch (this._Platform) {
             case 'win32':
+                let downloadURL: string;
+                let downloadPath_WIN: string;                
+                
                 // Get the URL of the file to download
-                let downloadURL: string = this._getPackageURL('laz');
+                downloadURL = this._getPackageURL('laz64');
                 core.info(`_downloadLazarus - Downloading ${downloadURL}`);
-
-                let downloadPath_WIN: string;
-
                 try {
 
                     if (cacheRestored) {
                         // Use cached version
-                        downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}.exe`);
+                        downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-64.exe`);
                         core.info(`_downloadLazarus - Using cache restored into ${downloadPath_WIN}`);
                     } else {
                         // Perform the download
-                        downloadPath_WIN = await tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}.exe`));
+                        downloadPath_WIN = await tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-64.exe`));
                         core.info(`_downloadLazarus - Downloaded into ${downloadPath_WIN}`);
                     }
 
@@ -476,6 +480,29 @@ export class Lazarus{
                     let fpcDir = path.join(lazarusDir, 'fpc', fpc_version, 'bin', 'x86_64-win64');
                     core.addPath(fpcDir);
                     core.info(`_downloadLazarus - Adding '${fpcDir}' to PATH`);
+
+                } catch(err) {
+                    throw err;
+                }
+
+                // Get the URL of the file to download
+                downloadURL = this._getPackageURL('laz32');
+                core.info(`_downloadLazarus - Downloading ${downloadURL}`);
+                try {
+
+                    if (cacheRestored) {
+                        // Use cached version
+                        downloadPath_WIN = path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-32.exe`);
+                        core.info(`_downloadLazarus - Using cache restored into ${downloadPath_WIN}`);
+                    } else {
+                        // Perform the download
+                        downloadPath_WIN = await tc.downloadTool(downloadURL, path.join(this._getTempDirectory(), `lazarus-${this._LazarusVersion}-32.exe`));
+                        core.info(`_downloadLazarus - Downloaded into ${downloadPath_WIN}`);
+                    }
+
+                    // Run the installer
+                    let lazarusDir: string = path.join(this._getTempDirectory(), 'lazarus');
+                    await exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                 } catch(err) {
                     throw err;
