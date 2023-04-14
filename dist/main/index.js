@@ -666,8 +666,8 @@ class Lazarus {
             let cacheRestored = yield this._Cache.restore();
             switch (this._Platform) {
                 case 'win32':
-                let downloadURL: string;
-                let downloadPath_WIN: string;
+                let downloadURL;
+                let downloadPath_WIN;
 
                 // Get the URL of the file to download
                 downloadURL = this._getPackageURL('laz64');
@@ -685,7 +685,7 @@ class Lazarus {
                     }
 
                     // Run the installer
-                    let lazarusDir: string = path.join(this._getTempDirectory(), 'lazarus');
+                    let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
                     yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                     // Add this path to the runner's global path
@@ -721,7 +721,7 @@ class Lazarus {
                     }
 
                     // Run the installer
-                    let lazarusDir: string = path.join(this._getTempDirectory(), 'lazarus');
+                    let lazarusDir = path.join(this._getTempDirectory(), 'lazarus');
                     yield exec(`${downloadPath_WIN} /VERYSILENT /DIR=${lazarusDir}`);
 
                 } catch(err) {
