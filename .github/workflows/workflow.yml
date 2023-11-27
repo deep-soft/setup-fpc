@@ -28,3 +28,32 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+
+      - name: Create archive
+        continue-on-error: true
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'zip'
+          filename: "npm-build-${{ job.matrix.operating-system }}"
+          directory: '.'
+          exclusions: ''
+          #recursive_exclusions: ''
+          path: '.'
+          env_variable: ZIP_RELEASE_ARCHIVE
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
+
+      - name: Upload artifact
+        continue-on-error: true
+        uses: deep-soft/upload-artifact@main
+        with:
+          name: ${{ env.ZIP_RELEASE_ARCHIVE }}
+          path: ${{ env.ZIP_RELEASE_ARCHIVE }}
+
+      - name: Publish artifact
+        continue-on-error: true
+        uses: deep-soft/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ env.ZIP_RELEASE_ARCHIVE }}
+          files: |
+            ${{ env.ZIP_RELEASE_ARCHIVE }}
