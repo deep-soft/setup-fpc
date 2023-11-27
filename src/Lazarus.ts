@@ -238,8 +238,8 @@ export class Lazarus{
         core.info(`installLazarus: ${this._LazarusVersion}`);
         if (this._LazarusVersion == '3.0.0') {
            await this._downloadLazarus();
-           break;
-        }
+        } else
+        {
         switch (this._LazarusVersion) {
             // Special case named version that installs the repository pakages on Ubuntu
             // but installs stable version under Windows
@@ -446,6 +446,7 @@ export class Lazarus{
                 break;
             default:
                 throw new Error(`getLazarus - Version not available: ${this._LazarusVersion}`);
+        }
         }
     }
 
