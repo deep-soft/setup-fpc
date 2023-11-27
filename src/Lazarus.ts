@@ -592,6 +592,28 @@ export class Lazarus{
                         await exec(`sudo installer -package ${downloadPath_DAR} -target /`);
                     }
 
+                    // For 2.0.10 and older, lazbuild symlink is /Library/Lazarus/lazbuild
+                    // For 2.0.12, lazbuild symlink is /Applications/Lazarus/lazbuild
+                    // Update the symlink to lazbuild
+                    const lazLibPath = '/Library/Lazarus/lazbuild'
+                    const lazAppPath = '/Applications/Lazarus/lazbuild'
+                    try {
+                        if (fs.existsSync(`${lazLibPath}`)) {
+                            core.info(`installLazarus - Do not need to update lazbuild symlink`);
+                        } else if (fs.existsSync(`${lazAppPath}`)) {
+                            core.info(`installLazarus - Updating lazbuild symlink to ${lazAppPath}`);
+                            // Remove bad symlink
+                            await exec(`rm -rf /usr/local/bin/lazbuild`);
+                            // Add good symlink
+                            await exec(`ln -s ${lazAppPath} /usr/local/bin/lazbuild`);
+                        } else {
+                            throw new Error(`Could not find lazbuild in ${lazLibPath} or ${lazAppPath}`);
+                        }
+                    } catch(err) {
+                        throw err;
+                    }
+                    break;
+
                 } catch(err) {
                     throw err;
                 }
