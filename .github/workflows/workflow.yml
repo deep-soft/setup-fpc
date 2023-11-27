@@ -43,7 +43,7 @@ jobs:
           type: 'zip'
           filename: "npm-build-dist-${{ matrix.operating-system }}"
           directory: '.'
-          exclusions: '/*node_modules/*'
+          exclusions: '*node_modules*'
           recursive_exclusions: ''
           path: './dist'
           env_variable: ZIP_RELEASE_ARCHIVE
