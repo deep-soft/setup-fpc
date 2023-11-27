@@ -34,7 +34,7 @@ jobs:
         uses: deep-soft/zip-release@v2
         with:
           type: 'zip'
-          filename: "npm-build-${{ job.matrix.operating-system }}"
+          filename: "npm-build-${{ matrix.operating-system }}"
           directory: '.'
           exclusions: ''
           #recursive_exclusions: ''
