@@ -443,7 +443,6 @@ export class Lazarus{
             default:
                 throw new Error(`getLazarus - Version not available: ${this._LazarusVersion}`);
         }
-        }
     }
 
     private async _downloadLazarus(): Promise<void> {
