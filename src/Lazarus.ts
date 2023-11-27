@@ -188,6 +188,11 @@ const pkgs: object = {
         }
     },
     "darwin": {
+        "v3_0_0":{
+            "laz": "Lazarus-3.0RC2-macosx-x86_64.pkg",
+            "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
+            "fpcsrc": "fpc-src-3.2.2-20210709-macosx.dmg"
+        },
         "v2_2_2":{
             "laz": "Lazarus-2.2.2-0-x86_64-macosx.pkg",
             "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
@@ -281,6 +286,9 @@ export class Lazarus{
             case 'stable':
                 this._LazarusVersion = StableVersion;
                 this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
+                await this._downloadLazarus();
+                break;
+            case '3.0.0':
                 await this._downloadLazarus();
                 break;
             case '2.2.2':
@@ -614,7 +622,11 @@ export class Lazarus{
                 result += pkgs[this._Platform][lazVer][pkg];
                 break;
             case "darwin":
+                if (lazVer == 'v3_0_0') {
+                    result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%203.0RC2/`;
+                } else {
                 result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%20${this._LazarusVersion}/`;
+                }
                 result += pkgs[this._Platform][lazVer][pkg];
                 break;
             default:
