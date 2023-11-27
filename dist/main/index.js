@@ -390,6 +390,11 @@ const pkgs = {
         }
     },
     "darwin": {
+        "v3_0_0": {
+            "laz": "Lazarus-3.0RC2-macosx-x86_64.pkg",
+            "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
+            "fpcsrc": "fpc-src-3.2.2-20210709-macosx.dmg"
+        },
         "v2_2_2": {
             "laz": "Lazarus-2.2.2-0-x86_64-macosx.pkg",
             "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
@@ -429,230 +434,239 @@ class Lazarus {
     installLazarus() {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`installLazarus -- Installing Lazarus ${this._LazarusVersion} on platform: "${this._Platform}"; arch: "${this._Arch}"`);
-            switch (this._LazarusVersion) {
-                // Special case named version that installs the repository pakages on Ubuntu
-                // but installs stable version under Windows
-                case "dist":
-                    switch (this._Platform) {
-                        case 'linux':
-                            // Perform a repository update
-                            yield exec_1.exec('sudo apt update');
-                            // Install Lazarus from the Ubuntu repository
-                            yield exec_1.exec('sudo apt install -y lazarus');
-                            break;
-                        case 'darwin':
-                            // Perform a repository update
-                            yield exec_1.exec('brew update');
-                            // Install Lazarus using homebrew
-                            yield exec_1.exec('brew install lazarus');
-                            // For 2.0.10 and older, lazbuild symlink is /Library/Lazarus/lazbuild
-                            // For 2.0.12, lazbuild symlink is /Applications/Lazarus/lazbuild
-                            // Update the symlink to lazbuild
-                            const lazLibPath = '/Library/Lazarus/lazbuild';
-                            const lazAppPath = '/Applications/Lazarus/lazbuild';
-                            try {
-                                if (fs.existsSync(`${lazLibPath}`)) {
-                                    core.info(`installLazarus - Do not need to update lazbuild symlink`);
+            core.info(`installLazarus: ${this._LazarusVersion}`);
+            if (this._LazarusVersion == '3.0.0') {
+                yield this._downloadLazarus();
+            }
+            else {
+                switch (this._LazarusVersion) {
+                    // Special case named version that installs the repository pakages on Ubuntu
+                    // but installs stable version under Windows
+                    case "dist":
+                        switch (this._Platform) {
+                            case 'linux':
+                                // Perform a repository update
+                                yield exec_1.exec('sudo apt update');
+                                // Install Lazarus from the Ubuntu repository
+                                yield exec_1.exec('sudo apt install -y lazarus');
+                                break;
+                            case 'darwin':
+                                // Perform a repository update
+                                yield exec_1.exec('brew update');
+                                // Install Lazarus using homebrew
+                                yield exec_1.exec('brew install lazarus');
+                                // For 2.0.10 and older, lazbuild symlink is /Library/Lazarus/lazbuild
+                                // For 2.0.12, lazbuild symlink is /Applications/Lazarus/lazbuild
+                                // Update the symlink to lazbuild
+                                const lazLibPath = '/Library/Lazarus/lazbuild';
+                                const lazAppPath = '/Applications/Lazarus/lazbuild';
+                                try {
+                                    if (fs.existsSync(`${lazLibPath}`)) {
+                                        core.info(`installLazarus - Do not need to update lazbuild symlink`);
+                                    }
+                                    else if (fs.existsSync(`${lazAppPath}`)) {
+                                        core.info(`installLazarus - Updating lazbuild symlink to ${lazAppPath}`);
+                                        // Remove bad symlink
+                                        yield exec_1.exec(`rm -rf /usr/local/bin/lazbuild`);
+                                        // Add good symlink
+                                        yield exec_1.exec(`ln -s ${lazAppPath} /usr/local/bin/lazbuild`);
+                                    }
+                                    else {
+                                        throw new Error(`Could not find lazbuild in ${lazLibPath} or ${lazAppPath}`);
+                                    }
                                 }
-                                else if (fs.existsSync(`${lazAppPath}`)) {
-                                    core.info(`installLazarus - Updating lazbuild symlink to ${lazAppPath}`);
-                                    // Remove bad symlink
-                                    yield exec_1.exec(`rm -rf /usr/local/bin/lazbuild`);
-                                    // Add good symlink
-                                    yield exec_1.exec(`ln -s ${lazAppPath} /usr/local/bin/lazbuild`);
+                                catch (err) {
+                                    throw err;
                                 }
-                                else {
-                                    throw new Error(`Could not find lazbuild in ${lazLibPath} or ${lazAppPath}`);
-                                }
-                            }
-                            catch (err) {
-                                throw err;
-                            }
-                            break;
-                        case 'win32':
-                            this._LazarusVersion = StableVersion;
-                            this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
+                                break;
+                            case 'win32':
+                                this._LazarusVersion = StableVersion;
+                                this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
+                                yield this._downloadLazarus();
+                                break;
+                            default:
+                                throw new Error(`getLazarus - Platform not supported: ${this._Platform}`);
+                        }
+                        break;
+                    // Special case named version that installs the latest stable version
+                    case 'stable':
+                        this._LazarusVersion = StableVersion;
+                        this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
+                        yield this._downloadLazarus();
+                        break;
+                    case '3.0.0':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.2.2':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.2.0':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.0.12':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.0.10':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.0.8':
+                        yield this._downloadLazarus();
+                        break;
+                    case '2.0.6':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
                             yield this._downloadLazarus();
-                            break;
-                        default:
-                            throw new Error(`getLazarus - Platform not supported: ${this._Platform}`);
-                    }
-                    break;
-                // Special case named version that installs the latest stable version
-                case 'stable':
-                    this._LazarusVersion = StableVersion;
-                    this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
-                    yield this._downloadLazarus();
-                    break;
-                case '2.2.2':
-                    yield this._downloadLazarus();
-                    break;
-                case '2.2.0':
-                    yield this._downloadLazarus();
-                    break;
-                case '2.0.12':
-                    yield this._downloadLazarus();
-                    break;
-                case '2.0.10':
-                    yield this._downloadLazarus();
-                    break;
-                case '2.0.8':
-                    yield this._downloadLazarus();
-                    break;
-                case '2.0.6':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '2.0.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '2.0.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '2.0.0':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.8.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.8.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.8.0':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.6.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.6.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.6':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.4.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.4.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.2.6':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.2.4':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.2.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.2':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.0.14':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                case '1.0.12':
-                    if (this._Platform == 'darwin') {
-                        throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
-                    }
-                    else {
-                        yield this._downloadLazarus();
-                    }
-                    break;
-                default:
-                    throw new Error(`getLazarus - Version not available: ${this._LazarusVersion}`);
+                        }
+                        break;
+                    case '2.0.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '2.0.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '2.0.0':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.8.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.8.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.8.0':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.6.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.6.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.6':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.4.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.4.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.2.6':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.2.4':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.2.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.2':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.0.14':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    case '1.0.12':
+                        if (this._Platform == 'darwin') {
+                            throw new Error('GitHub runners do not support Lazarus below 2.0.8 on macos');
+                        }
+                        else {
+                            yield this._downloadLazarus();
+                        }
+                        break;
+                    default:
+                        throw new Error(`getLazarus - Version not available: ${this._LazarusVersion}`);
+                }
             }
         });
     }
@@ -826,7 +840,12 @@ class Lazarus {
                 result += pkgs[this._Platform][lazVer][pkg];
                 break;
             case "darwin":
-                result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%20${this._LazarusVersion}/`;
+                if (lazVer == 'v3_0_0') {
+                    result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%203.0RC2/`;
+                }
+                else {
+                    result = `https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%20${this._LazarusVersion}/`;
+                }
                 result += pkgs[this._Platform][lazVer][pkg];
                 break;
             default:
