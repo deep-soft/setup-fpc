@@ -390,11 +390,6 @@ const pkgs = {
         }
     },
     "darwin": {
-        "v3_0RC2": {
-            "laz": "Lazarus-3.0RC2-macosx-x86_64.pkg",
-            "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
-            "fpcsrc": "fpc-src-3.2.2-20210709-macosx.dmg"
-        },
         "v2_2_2": {
             "laz": "Lazarus-2.2.2-0-x86_64-macosx.pkg",
             "fpc": "fpc-3.2.2.intelarm64-macosx.dmg",
@@ -434,7 +429,6 @@ class Lazarus {
     installLazarus() {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`installLazarus -- Installing Lazarus ${this._LazarusVersion} on platform: "${this._Platform}"; arch: "${this._Arch}"`);
-            core.info(`installLazarus: ${this._LazarusVersion}`);
             switch (this._LazarusVersion) {
                 // Special case named version that installs the repository pakages on Ubuntu
                 // but installs stable version under Windows
@@ -488,9 +482,6 @@ class Lazarus {
                 case 'stable':
                     this._LazarusVersion = StableVersion;
                     this._Cache.Key = this._LazarusVersion + '-' + this._Arch + '-' + this._Platform;
-                    yield this._downloadLazarus();
-                    break;
-                case '3.0RC2':
                     yield this._downloadLazarus();
                     break;
                 case '2.2.2':
@@ -805,30 +796,6 @@ class Lazarus {
                             // Install the package
                             yield exec_1.exec(`sudo installer -package ${downloadPath_DAR} -target /`);
                         }
-                        // For 2.0.10 and older, lazbuild symlink is /Library/Lazarus/lazbuild
-                        // For 2.0.12, lazbuild symlink is /Applications/Lazarus/lazbuild
-                        // Update the symlink to lazbuild
-                        const lazLibPath = '/Library/Lazarus/lazbuild';
-                        const lazAppPath = '/Applications/Lazarus/lazbuild';
-                        try {
-                            if (fs.existsSync(`${lazLibPath}`)) {
-                                core.info(`installLazarus - Do not need to update lazbuild symlink`);
-                            }
-                            else if (fs.existsSync(`${lazAppPath}`)) {
-                                core.info(`installLazarus - Updating lazbuild symlink to ${lazAppPath}`);
-                                // Remove bad symlink
-                                yield exec_1.exec(`rm -rf /usr/local/bin/lazbuild`);
-                                // Add good symlink
-                                yield exec_1.exec(`ln -s ${lazAppPath} /usr/local/bin/lazbuild`);
-                            }
-                            else {
-                                throw new Error(`Could not find lazbuild in ${lazLibPath} or ${lazAppPath}`);
-                            }
-                        }
-                        catch (err) {
-                            throw err;
-                        }
-                        break;
                     }
                     catch (err) {
                         throw err;
