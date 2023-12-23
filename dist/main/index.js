@@ -213,9 +213,13 @@ const assert_1 = __webpack_require__(2357);
 const fs = __importStar(__webpack_require__(5747));
 const Cache_1 = __webpack_require__(3123);
 //const fs = require('fs');
-const StableVersion = '2.2.2';
+const StableVersion = '3.0';
 const pkgs = {
     "win32": {
+        "v3_0":{
+            "laz64": "lazarus-3.0-fpc-3.2.2-win64.exe",
+            "laz32": "lazarus-3.0-fpc-3.2.2-cross-i386-win32-win64.exe"
+        },
         "v2_2_6":{
             "laz64": "lazarus-2.2.6-fpc-3.2.2-win64.exe",
             "laz32": "lazarus-2.2.6-fpc-3.2.2-cross-i386-win32-win64.exe"
@@ -246,6 +250,10 @@ const pkgs = {
         "v1_0_12": "lazarus-1.0.12-fpc-2.6.2-win32.exe"
     },
     "win64": {
+        "v3_0":{
+            "laz64": "lazarus-3.0-fpc-3.2.2-win64.exe",
+            "laz32": "lazarus-3.0-fpc-3.2.2-cross-i386-win32-win64.exe"
+        },
         "v2_2_6":{
             "laz64": "lazarus-2.2.6-fpc-3.2.2-win64.exe",
             "laz32": "lazarus-2.2.6-fpc-3.2.2-cross-i386-win32-win64.exe"
